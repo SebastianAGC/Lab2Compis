@@ -12,5 +12,46 @@ public class Nodo {
         elNodo.add(nodo);
     }
 
+    public int getNumeroEstado() {
+        return numeroEstado;
+    }
+
+    public void setNumeroEstado(int numeroEstado) {
+        this.numeroEstado = numeroEstado;
+    }
+
+    public boolean isEsInicial() {
+        return esInicial;
+    }
+
+    public void setEsInicial(boolean esInicial) {
+        this.esInicial = esInicial;
+    }
+
+    public boolean isEsFinal() {
+        return esFinal;
+    }
+
+    public void setEsFinal(boolean esFinal) {
+        this.esFinal = esFinal;
+    }
+
+    public ArrayList<String> getTransiciones() {
+        return transiciones;
+    }
+
+    public void setTransiciones(ArrayList<String> transiciones) {
+        this.transiciones = transiciones;
+    }
+
+    public ArrayList<Nodo> getElNodo() {
+        return elNodo;
+    }
+
+    public void setElNodo(ArrayList<Nodo> elNodo) {
+        this.elNodo = elNodo;
+    }
+    
+    
 
 }
