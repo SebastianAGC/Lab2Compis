@@ -18,7 +18,7 @@ public class MainLab2{
     /**
      * @param args the command line arguments
      */
-    public static ArrayList<Nodo> miArrayNodos = new ArrayList<>();
+    
     
     public static void main(String[] args) {
         Operaciones operacion = new Operaciones();
@@ -30,8 +30,9 @@ public class MainLab2{
         int c = 0,o=0,k=0,ch=0;
              
 
-        
+        //Solicitando al usuario que ingrese la expresion regular
         regexp = JOptionPane.showInputDialog("Ingrese la expresión regular que desee: ");
+        //Conversion de la cadena a notacion Postfix 
         regexpPF = sC.infixToPostfix(regexp);
         JOptionPane.showMessageDialog(null,"Esta es la expresion regular que ingreso en formato POSTFIX: " + regexpPF);
         
@@ -79,7 +80,7 @@ public class MainLab2{
                     Automata e = new Automata("$");
                     Automata automataOrEpsilon = operacion.or(X, e);
                     miStack.push(automataOrEpsilon);
-                    System.out.println("Automata Creado." + miStack.size());
+                    //System.out.println("Automata Creado." + miStack.size());
                 }
                 if(caracter.equals("+")){
                     //Hacer aqui cerradura positiva
@@ -91,26 +92,28 @@ public class MainLab2{
                 }
             }else{
                 ch++;
-                if(alfabeto.contains(caracter)){
-                    //alfabeto.add(caracter);
-                }else{
+                //Ciclo if que verifica si el ArrayList del alfabeto ya contiene el caractér
+                if(alfabeto.contains(caracter)==false){
                     alfabeto.add(caracter);
                 }
-
+                //Creando el automata básico
                 Automata elAutomata = new Automata(caracter);
                 miStack.push(elAutomata);
-                //System.out.println("Tamaño del stack: " + miStack.size());
+                System.out.println("Tamaño del stack: " + miStack.size());
             }
         }
-        //System.out.println("Tamaño del stack: " + miStack.size());
+        System.out.println("Tamaño del stack: " + miStack.size());
         Automata elAutomatota = miStack.pop();
         int tamaño = operacion.TamañoRegex(ch, c, k, o);
-        //System.out.println(""+tamaño);
-        JOptionPane.showMessageDialog(null,elAutomatota.getArrayNodos(tamaño)+
-                "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
-        + elAutomatota.getNodoInicial() + "\nAceptacion = " + elAutomatota.getNodoFinal());
-        
+        //Quitando los nodos repetidos
+        operacion.quitarNodosRepetidos();
+        //Nombrando a los nodos
+        operacion.nombrandoNodos();
+       
+        //System.out.println("El automata debe tener "+tamaño + " nodos.");
+        JOptionPane.showMessageDialog(null,"Lista de nodos = "+operacion.listadoNodos() 
+            + "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
+            + elAutomatota.getNodoInicial().getNumeroEstado() + "\nAceptacion = " + elAutomatota.getNodoFinal().getNumeroEstado()
+            + "\nTransiciones: " + operacion.transiciones());  
     }
-
-    
 }

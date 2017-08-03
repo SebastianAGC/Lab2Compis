@@ -13,6 +13,8 @@ import java.util.ArrayList;
  */
 public class Operaciones {
     
+    public static ArrayList<Nodo> miArrayNodos = new ArrayList<>();
+    ArrayList<Nodo> nodosSR = new ArrayList<>(); //ArrayList de Nodos sin repetir
     
     public Automata concatenacion(Automata automataA, Automata automataB){
         automataA.setNodoFinal(automataB.getNodoInicial());
@@ -86,6 +88,52 @@ public class Operaciones {
     public int TamañoRegex(int ch,int c,int k,int o){
         int tamaño = (ch*2)+(c*-1)+(o*2)+(k*2);
         return tamaño;
+    }
+    
+    public void quitarNodosRepetidos(){
+        for(int x=0;x<miArrayNodos.size();x++){
+            if(nodosSR.contains(miArrayNodos.get(x))==false){
+                nodosSR.add(miArrayNodos.get(x));
+            }else{
+                System.out.print("Ese nodo ya existe.");
+            }
+        }
+        System.out.println("El tamaño de este array es: " + nodosSR.size());
+    }
+    public String listadoNodos(){
+        String listadoDeNodos="{";
+        System.out.println("El tamaño del ArrayList de Nodos es de: "+ nodosSR.size());
+        for(int i=0;i<nodosSR.size();i++){
+            listadoDeNodos+=""+ nodosSR.get(i).getNumeroEstado() + ", ";
+        }
+        listadoDeNodos+="}";
+        return listadoDeNodos;
+       
+    }
+    
+    public void nombrandoNodos(){
+        for(int i=0; i<nodosSR.size();i++){
+            nodosSR.get(i).setNumeroEstado(i);
+        }
+    }
+    public String transiciones(){
+        String transiciones="";
+        ArrayList nodosFinales;
+        ArrayList transicionesN;
+        Nodo nodo;
+        for(int i=0; i<nodosSR.size();i++){
+            //Obteniendo el nodo-i.
+            nodo = nodosSR.get(i);
+            //Obtienendo los nodos a los que esta conectado el nodo-i.
+            nodosFinales = nodo.getElNodo();
+            //Obteniendo las transisiones desde el nodo-i a los nodos conectados.
+            transicionesN = nodo.getTransiciones();
+            
+            for(int j=0; j<nodo.getElNodo().size();j++){
+                transiciones+="(" + nodo.getNumeroEstado() + ", " + transicionesN.get(j) + ", " + nodo.getElNodo().get(j).getNumeroEstado() +"), ";
+            }
+        }
+        return transiciones;
     }
 
     

@@ -9,42 +9,36 @@ public class Automata {
     public Automata(String transicion){
         //agregando al nodo inicial del automata el nodo al que esta dirigido
         nodoInicial.agregar(transicion, nodoFinal);
-        if(MainLab2.miArrayNodos.contains(nodoInicial) ){
-            
-        }else{
-
-            MainLab2.miArrayNodos.add(nodoInicial);
-            System.out.println("Añadiendo nodo #: " +MainLab2.miArrayNodos.size());
+        
+        /*Verificando que los nodos creados no esten en el array de Nodos antes
+          de agregarlos*/
+        
+        if(Operaciones.miArrayNodos.contains(nodoInicial)==false ){
+            Operaciones.miArrayNodos.add(nodoInicial);
+            System.out.println("Añadiendo nodo #: " + Operaciones.miArrayNodos.size());
         }
 
-        if(MainLab2.miArrayNodos.contains(nodoFinal) ){
-            
-        }else{
-            
-            MainLab2.miArrayNodos.add(nodoFinal);
-            System.out.println("Añadiendo nodo #: " +MainLab2.miArrayNodos.size());
+        if(Operaciones.miArrayNodos.contains(nodoFinal)==false){
+            Operaciones.miArrayNodos.add(nodoFinal);
+            System.out.println("Añadiendo nodo #: " + Operaciones.miArrayNodos.size());
         }
     }
     
     public Automata( Nodo I, Nodo F){
         nodoInicial=I;
         nodoFinal=F;
-        if(MainLab2.miArrayNodos.contains(nodoInicial) ){
-            
-        }else{
-
-            MainLab2.miArrayNodos.add(nodoInicial);
-            System.out.println("Añadiendo nodo #: " +MainLab2.miArrayNodos.size());
+        /*Verificando que los nodos creados no esten en el array de Nodos antes
+          de agregarlos*/
+        if(Operaciones.miArrayNodos.contains(nodoInicial)==false){
+            Operaciones.miArrayNodos.add(nodoInicial);
+            System.out.println("Añadiendo nodo #: " + Operaciones.miArrayNodos.size());
         }
-/*
-        if(MainLab2.miArrayNodos.contains(nodoFinal) ){
-            
-        }else{
 
-            MainLab2.miArrayNodos.add(nodoFinal);
-            System.out.println("Añadiendo nodo #: " +MainLab2.miArrayNodos.size());
+        if(Operaciones.miArrayNodos.contains(nodoFinal)==false){
+            Operaciones.miArrayNodos.add(nodoFinal);
+            System.out.println("Añadiendo nodo #: " + Operaciones.miArrayNodos.size());
         }
-        */
+        
     }
 
 
@@ -64,15 +58,17 @@ public class Automata {
         this.nodoFinal = nodoFinal;
     }
     
+
+    /*
     public String getArrayNodos(int tamaño){
         String nodosAutomatas="{";
         int cont=0-1;
         ArrayList<Nodo> temp = new ArrayList<>();
         /*Ciclo while que verifica que el tamaño del array de nodos sea del mismo
-        tamaño que la cantidad de nodos que deben haber*/
-        while(MainLab2.miArrayNodos.size()<tamaño){
+        tamaño que la cantidad de nodos que deben haber/
+        while(miArrayNodos.size()<tamaño){
             //Asignando un ArrayList Temporal.
-            temp = MainLab2.miArrayNodos;
+            temp = miArrayNodos;
             System.out.println(temp.size() + ", " + tamaño);
             for(int i=0;i<temp.size();i++){
                 ArrayList<Nodo> ElArray = temp.get(i).getElNodo();
@@ -88,15 +84,15 @@ public class Automata {
                 
             }
             System.out.println("Actualizando automata...");
-            MainLab2.miArrayNodos = temp;
+            miArrayNodos = temp;
         }
-        for(int y=0;y<MainLab2.miArrayNodos.size();y++){
-            nodosAutomatas+=String.valueOf(MainLab2.miArrayNodos.get(y))+", ";
+        for(int y=0;y<miArrayNodos.size();y++){
+            nodosAutomatas+=String.valueOf(miArrayNodos.get(y))+", ";
         }
         nodosAutomatas+="}";
         return nodosAutomatas;
     }
-    
+    */
     /*
     public String getArrayNodos1(){
         int cont=0;
