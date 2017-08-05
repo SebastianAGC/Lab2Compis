@@ -1,119 +1,140 @@
 
 import java.util.ArrayList;
+import java.util.Scanner;
 import javax.swing.JOptionPane;
 import java.util.Stack;
-
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.*;
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
+ * Universdidad del Valle de Guatemala
+ * Diseño de lenguajes de programacion
+ * Compiladores
  *
- * @author sebas
+ * @author Sebastian Galindo, Carnet: 15452
  */
 public class MainLab2{
 
-    /**
-     * @param args the command line arguments
-     */
-    
-    
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
         Operaciones operacion = new Operaciones();
         RegExConverter sC = new RegExConverter();
         String regexp;
         String regexpPF;
         Stack<Automata> miStack = new Stack<>();
         ArrayList<String> alfabeto = new ArrayList<>();
-        int c = 0,o=0,k=0,ch=0;
-             
 
         //Solicitando al usuario que ingrese la expresion regular
-        regexp = JOptionPane.showInputDialog("Ingrese la expresión regular que desee: ");
+        System.out.println("Ingrese la expresion regular que desee: ");
+        regexp=scanner.nextLine();
         //Conversion de la cadena a notacion Postfix 
         regexpPF = sC.infixToPostfix(regexp);
-        JOptionPane.showMessageDialog(null,"Esta es la expresion regular que ingreso en formato POSTFIX: " + regexpPF);
-        
+
+        long time_start, time_end;
+        time_start = System.currentTimeMillis();
+
         for (int x=0;x<regexpPF.length();x++){
             String caracter = String.valueOf(regexpPF.charAt(x));
             if(caracter.equals("*") || caracter.equals("|") || caracter.equals("?") || caracter.equals(".") || caracter.equals("+")){
                 if(caracter.equals(".")){
                     //Hacer aqui la concatenacion
-                    c++;
                     if(miStack.size()>=2){
-                        //System.out.println("Entre a la concatenacion.");
                         Automata automataB=miStack.pop();
                         Automata automataA=miStack.pop();
                         Automata automataAB = operacion.concatenacion(automataA, automataB);
                         miStack.push(automataAB);
                     }else{
-                        JOptionPane.showMessageDialog(null,"La cadena no es una regex.");  
+                        JOptionPane.showMessageDialog(null,"La cadena ingresada no es una regex.");
+                        System.exit(0);
                     }
                 }
                 if(caracter.equals("|")){
-                    //Hacer aqui el OR
-                    o++;
+                    //OR
                     if(miStack.size()>=2){
-                        //System.out.println("Entre al OR.");
                         Automata automataB=miStack.pop();
                         Automata automataA=miStack.pop();
                         Automata automataAorB=operacion.or(automataA, automataB);
                         miStack.push(automataAorB);
                     }else{
-                        JOptionPane.showMessageDialog(null,"La cadena no es una regex.");  
+                        JOptionPane.showMessageDialog(null,"La cadena ingresada no es una regex.");
+                        System.exit(0);
                     }       
                 }
                 if(caracter.equals("*")){
-                    //Hacer aqui Kleene
-                    k++;
-                    //System.out.println("Entre al kleene.");
-                    Automata automataA=miStack.pop();
-                    Automata automataK=operacion.kleene(automataA); 
-                    miStack.push(automataK);
+                    //Kleene
+                    if(miStack.size()>=1) {
+                        Automata automataA = miStack.pop();
+                        Automata automataK = operacion.kleene(automataA);
+                        miStack.push(automataK);
+                    }else{
+                        JOptionPane.showMessageDialog( null, "La cadena ingresada no es una regex.");
+                        System.exit(0);
+                    }
                 }
                 if(caracter.equals("?")){
-                    //Hacer aqui (x|e)*
-                    //System.out.println("Entre a la abreviatura.");
-                    Automata X = miStack.pop();
-                    Automata e = new Automata("$");
-                    Automata automataOrEpsilon = operacion.or(X, e);
-                    miStack.push(automataOrEpsilon);
-                    //System.out.println("Automata Creado." + miStack.size());
+                    //Abreviatura ?
+                    if(miStack.size()>=1) {
+                        Automata X = miStack.pop();
+                        Automata e = new Automata("$");
+                        Automata automataOrEpsilon = operacion.or(X, e);
+                        miStack.push(automataOrEpsilon);
+                    }else{
+                        JOptionPane.showMessageDialog( null, "La cadena ingresada no es una regex.");
+                        System.exit(0);
+                    }
+
                 }
                 if(caracter.equals("+")){
-                    //Hacer aqui cerradura positiva
-                    //System.out.println("Entre a la cerradura positiva.");
-                    Automata a = miStack.pop();
-                    Automata a1 = operacion.kleene(a);
-                    Automata automataCerradura = operacion.concatenacion(a, a1);
-                    miStack.push(automataCerradura);
+                    //Cerradura Positiva
+                    if(miStack.size()>=1) {
+                        Automata a = miStack.pop();
+                        Automata automataCerradura = operacion.kleenemas(a);
+                        miStack.push(automataCerradura);
+                    }else{
+                        JOptionPane.showMessageDialog( null, "La cadena ingresada no es una regex.");
+                        System.exit(0);
+                    }
                 }
             }else{
-                ch++;
                 //Ciclo if que verifica si el ArrayList del alfabeto ya contiene el caractér
-                if(alfabeto.contains(caracter)==false){
+                if(alfabeto.contains(caracter)==false && !caracter.equals("$") && !caracter.equals("")){
                     alfabeto.add(caracter);
                 }
                 //Creando el automata básico
                 Automata elAutomata = new Automata(caracter);
                 miStack.push(elAutomata);
-                System.out.println("Tamaño del stack: " + miStack.size());
             }
         }
-        System.out.println("Tamaño del stack: " + miStack.size());
+
+        time_end = System.currentTimeMillis();
+        System.out.println("El automata fue creado en: "+ ( time_end - time_start ) +" millisegundos'");
+
         Automata elAutomatota = miStack.pop();
-        int tamaño = operacion.TamañoRegex(ch, c, k, o);
-        //Quitando los nodos repetidos
-        operacion.quitarNodosRepetidos();
+
+        //Creando un ArrayList que contiene todos
+        operacion.getArrayNodos(elAutomatota.getNodoInicial());
+
         //Nombrando a los nodos
-        operacion.nombrandoNodos();
-       
-        //System.out.println("El automata debe tener "+tamaño + " nodos.");
-        JOptionPane.showMessageDialog(null,"Lista de nodos = "+operacion.listadoNodos() 
-            + "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
-            + elAutomatota.getNodoInicial().getNumeroEstado() + "\nAceptacion = " + elAutomatota.getNodoFinal().getNumeroEstado()
-            + "\nTransiciones: " + operacion.transiciones());  
+        operacion.nombrarNodos();
+
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+
+        try {
+
+            PrintWriter writer = new PrintWriter("archivo.txt");
+            writer.println("Lista de nodos = "+operacion.listadoDeNodos()
+                    + "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
+                    + elAutomatota.getNodoInicial().getNumeroEstado() + "\nAceptacion = " + elAutomatota.getNodoFinal().getNumeroEstado()
+                    + "\nTransiciones: " + operacion.transiciones());
+            writer.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
     }
 }

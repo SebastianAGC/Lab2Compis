@@ -1,5 +1,13 @@
 import java.util.ArrayList;
 
+/*
+ * Universdidad del Valle de Guatemala
+ * Diseño de lenguajes de programacion
+ * Compiladores
+ *
+ * @author Sebastian Galindo, Carnet: 15452
+ */
+
 public class Nodo {
     private int numeroEstado;
     private boolean esInicial;
@@ -51,7 +59,5 @@ public class Nodo {
     public void setElNodo(ArrayList<Nodo> elNodo) {
         this.elNodo = elNodo;
     }
-    
-    
 
 }

@@ -1,24 +1,36 @@
 
 import java.util.ArrayList;
-
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Universdidad del Valle de Guatemala
+ * Diseño de lenguajes de programacion
+ * Compiladores
+ *
+ * @author Sebastian Galindo, Carnet: 15452
  */
 
-/**
- *
- * @author sebas
- */
 public class Operaciones {
     
     public static ArrayList<Nodo> miArrayNodos = new ArrayList<>();
     ArrayList<Nodo> nodosSR = new ArrayList<>(); //ArrayList de Nodos sin repetir
     
     public Automata concatenacion(Automata automataA, Automata automataB){
-        automataA.setNodoFinal(automataB.getNodoInicial());
+
+        //asignando los nodos del inicial de b al final de a
+        ArrayList<Nodo> losNodos = automataB.getNodoInicial().getElNodo();
+        automataA.getNodoFinal().setElNodo(losNodos);
+
+        //Asiganando las transiciones del inicial al final
+        ArrayList<String> trans = automataB.getNodoInicial().getTransiciones();
+        automataA.getNodoFinal().setTransiciones(trans);
+
         Automata automataAB = new Automata(automataA.getNodoInicial(), automataB.getNodoFinal());
+
         return automataAB;
     }
     
@@ -67,12 +79,33 @@ public class Operaciones {
         a.getNodoFinal().agregar("$", a.getNodoInicial());
         
         //Relacionando el nuevoNodoFinal con el nuevoNodoInicial
-        nuevoNodoFinal.agregar("$", nuevoNodoInicial);
+        nuevoNodoInicial.agregar("$", nuevoNodoFinal);
         
         Automata automataK = new Automata(nuevoNodoInicial, nuevoNodoFinal);
         return automataK;
     }
-    
+
+    public Automata kleenemas(Automata a){
+
+        //Creando un nuevo nodo inicial
+        Nodo nuevoNodoInicial = new Nodo();
+
+        //Creando un nuevo nodo final
+        Nodo nuevoNodoFinal = new Nodo();
+
+        //Relacionando el nuevoNodoInicial con el automata a
+        nuevoNodoInicial.agregar("$", a.getNodoInicial());
+
+        //Relacionando el nuevoNodoFinal con el nodo final de a
+        a.getNodoFinal().agregar("$", nuevoNodoFinal);
+
+        //Relacionando el nodo final de a con el nodo incial de a.
+        a.getNodoFinal().agregar("$", a.getNodoInicial());
+
+        Automata automataK = new Automata(nuevoNodoInicial, nuevoNodoFinal);
+        return automataK;
+    }
+
     public String alfabeto(ArrayList<String> Alf){
         String alfabeto="{";
         for(int i=0; i<Alf.size();i++){
@@ -81,49 +114,15 @@ public class Operaciones {
         alfabeto+="}";
         return alfabeto;
     }
-    
-    /*
-    *Formula creada para saber cuandos nodos deben de haber
-    */
-    public int TamañoRegex(int ch,int c,int k,int o){
-        int tamaño = (ch*2)+(c*-1)+(o*2)+(k*2);
-        return tamaño;
-    }
-    
-    public void quitarNodosRepetidos(){
-        for(int x=0;x<miArrayNodos.size();x++){
-            if(nodosSR.contains(miArrayNodos.get(x))==false){
-                nodosSR.add(miArrayNodos.get(x));
-            }else{
-                System.out.print("Ese nodo ya existe.");
-            }
-        }
-        System.out.println("El tamaño de este array es: " + nodosSR.size());
-    }
-    public String listadoNodos(){
-        String listadoDeNodos="{";
-        System.out.println("El tamaño del ArrayList de Nodos es de: "+ nodosSR.size());
-        for(int i=0;i<nodosSR.size();i++){
-            listadoDeNodos+=""+ nodosSR.get(i).getNumeroEstado() + ", ";
-        }
-        listadoDeNodos+="}";
-        return listadoDeNodos;
-       
-    }
-    
-    public void nombrandoNodos(){
-        for(int i=0; i<nodosSR.size();i++){
-            nodosSR.get(i).setNumeroEstado(i);
-        }
-    }
+
     public String transiciones(){
         String transiciones="";
         ArrayList nodosFinales;
         ArrayList transicionesN;
         Nodo nodo;
-        for(int i=0; i<nodosSR.size();i++){
+        for(int i=0; i<miArrayNodos.size();i++){
             //Obteniendo el nodo-i.
-            nodo = nodosSR.get(i);
+            nodo = miArrayNodos.get(i);
             //Obtienendo los nodos a los que esta conectado el nodo-i.
             nodosFinales = nodo.getElNodo();
             //Obteniendo las transisiones desde el nodo-i a los nodos conectados.
@@ -136,5 +135,42 @@ public class Operaciones {
         return transiciones;
     }
 
-    
+    public void getArrayNodos(Nodo nodo){
+        if(!miArrayNodos.contains(nodo)){
+            miArrayNodos.add(nodo);
+            ArrayList<Nodo> listadoDeNodos = nodo.getElNodo();
+            for (Nodo nodoR: listadoDeNodos) {
+                getArrayNodos(nodoR);
+            }
+        }
+
+    }
+
+    public void nombrarNodos(){
+        for (int i = 0; i<miArrayNodos.size();i++) {
+            miArrayNodos.get(i).setNumeroEstado(i);
+        }
+
+    }
+    public String listadoDeNodos(){
+        String cadena="{";
+        for (int i = 0; i<miArrayNodos.size();i++) {
+            cadena+=miArrayNodos.get(i).getNumeroEstado() + ", ";
+        }
+        cadena+="}";
+        return cadena;
+    }
+
+    public void crearProveedor(String cadena){
+        String texto;
+        try {
+            texto = cadena;
+            Writer output;
+            output = new BufferedWriter(new FileWriter(System.getProperty("user.dir") + "\\Archivo.txt",true));  //clears file every time
+            output.append(texto);
+            output.close();
+        }catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+    }
 }
