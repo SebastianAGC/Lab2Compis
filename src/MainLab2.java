@@ -1,12 +1,7 @@
 
-import java.util.ArrayList;
-import java.util.Scanner;
-import javax.swing.JOptionPane;
-import java.util.Stack;
+import java.util.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
 import java.io.*;
 /*
  * Universdidad del Valle de Guatemala
@@ -25,6 +20,7 @@ public class MainLab2{
         String regexpPF;
         Stack<Automata> miStack = new Stack<>();
         ArrayList<String> alfabeto = new ArrayList<>();
+
 
         //Solicitando al usuario que ingrese la expresion regular
         System.out.println("Ingrese la expresion regular que desee: ");
@@ -46,7 +42,7 @@ public class MainLab2{
                         Automata automataAB = operacion.concatenacion(automataA, automataB);
                         miStack.push(automataAB);
                     }else{
-                        JOptionPane.showMessageDialog(null,"La cadena ingresada no es una regex.");
+                        System.out.println("La cadena ingresada no es una regex.");
                         System.exit(0);
                     }
                 }
@@ -58,7 +54,7 @@ public class MainLab2{
                         Automata automataAorB=operacion.or(automataA, automataB);
                         miStack.push(automataAorB);
                     }else{
-                        JOptionPane.showMessageDialog(null,"La cadena ingresada no es una regex.");
+                        System.out.println("La cadena ingresada no es una regex.");
                         System.exit(0);
                     }       
                 }
@@ -69,7 +65,7 @@ public class MainLab2{
                         Automata automataK = operacion.kleene(automataA);
                         miStack.push(automataK);
                     }else{
-                        JOptionPane.showMessageDialog( null, "La cadena ingresada no es una regex.");
+                        System.out.println("La cadena ingresada no es una regex.");
                         System.exit(0);
                     }
                 }
@@ -81,7 +77,7 @@ public class MainLab2{
                         Automata automataOrEpsilon = operacion.or(X, e);
                         miStack.push(automataOrEpsilon);
                     }else{
-                        JOptionPane.showMessageDialog( null, "La cadena ingresada no es una regex.");
+                        System.out.println("La cadena ingresada no es una regex.");
                         System.exit(0);
                     }
 
@@ -93,13 +89,13 @@ public class MainLab2{
                         Automata automataCerradura = operacion.kleenemas(a);
                         miStack.push(automataCerradura);
                     }else{
-                        JOptionPane.showMessageDialog( null, "La cadena ingresada no es una regex.");
+                        System.out.println("La cadena ingresada no es una regex.");
                         System.exit(0);
                     }
                 }
             }else{
                 //Ciclo if que verifica si el ArrayList del alfabeto ya contiene el caractér
-                if(alfabeto.contains(caracter)==false && !caracter.equals("$") && !caracter.equals("")){
+                if(!alfabeto.contains(caracter) && !caracter.equals("$") && !caracter.equals("")){
                     alfabeto.add(caracter);
                 }
                 //Creando el automata básico
@@ -109,7 +105,7 @@ public class MainLab2{
         }
 
         time_end = System.currentTimeMillis();
-        System.out.println("El automata fue creado en: "+ ( time_end - time_start ) +" millisegundos'");
+        System.out.println("El AFN fue creado en: "+ ( time_end - time_start ) +" millisegundos'");
 
         Automata elAutomatota = miStack.pop();
 
@@ -119,16 +115,34 @@ public class MainLab2{
         //Nombrando a los nodos
         operacion.nombrarNodos();
 
+        long time_star, time_en;
+        time_star = System.currentTimeMillis();
+
+        //Conversion de AFN a AFD
+        AutomataDFA DFA  = new AutomataDFA();
+        operacion.subsetConstruction(elAutomatota.getNodoInicial(), alfabeto, DFA);
+
+        time_en = System.currentTimeMillis();
+        System.out.println("El AFD fue creado en: "+ ( time_en - time_star ) +" millisegundos'");
+
+        //Obteniendo un arrayList que contenga todos los nodos del AFD
+        operacion.getArrayNodosAFD(DFA.getTransicionesAFD());
+
+        //Nombrando los nodos del AFD
+        operacion.nombrarNodosDFA();
+
         BufferedWriter bw = null;
         FileWriter fw = null;
+
 
         try {
 
             PrintWriter writer = new PrintWriter("archivo.txt");
-            writer.println("Lista de nodos = "+operacion.listadoDeNodos()
+            writer.println("AFN:\nLista de nodos = "+operacion.listadoDeNodos()
                     + "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
                     + elAutomatota.getNodoInicial().getNumeroEstado() + "\nAceptacion = " + elAutomatota.getNodoFinal().getNumeroEstado()
-                    + "\nTransiciones: " + operacion.transiciones());
+                    + "\nTransiciones: " + operacion.transiciones()
+                    + "\n\n\nAFD:\n"+operacion.descripcionAFD(DFA));
             writer.close();
 
         } catch (Exception e) {

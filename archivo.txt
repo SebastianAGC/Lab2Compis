@@ -1,5 +1,11 @@
-Lista de nodos = {0, 1, 2, 3, 4, }
-Alfabeto = {a, b, c, d, }
+AFN:
+Lista de nodos = {0, 1, 2, }
+Alfabeto = {a, b, }
 Inicio = 0
-Aceptacion = 4
-Transiciones: (0, a, 1), (1, b, 2), (2, c, 3), (3, d, 4), 
+Aceptacion = 2
+Transiciones: (0, a, 1), (1, b, 2), 
+
+
+AFD:
+Lista de nodos: {0, 1, 2, }
+Transiciones: (0, a, 1),  (0, b, 2),  

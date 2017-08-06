@@ -1,10 +1,9 @@
 
-import java.util.ArrayList;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 /*
  * Universdidad del Valle de Guatemala
@@ -17,7 +16,13 @@ import java.io.IOException;
 public class Operaciones {
     
     public static ArrayList<Nodo> miArrayNodos = new ArrayList<>();
-    ArrayList<Nodo> nodosSR = new ArrayList<>(); //ArrayList de Nodos sin repetir
+    ArrayList<EstadoAFD> arrayTodosEstadosDFA = new ArrayList<>();
+    Set<EstadoAFD> Dstates = new HashSet<>();
+    Set<Nodo> eclosureT = new HashSet<>();
+    EstadoAFD U;
+    EstadoAFD conjuntoSinMarcar;
+    Stack<Nodo> eClosureStack = new Stack<>();
+
     
     public Automata concatenacion(Automata automataA, Automata automataB){
 
@@ -161,16 +166,144 @@ public class Operaciones {
         return cadena;
     }
 
-    public void crearProveedor(String cadena){
-        String texto;
-        try {
-            texto = cadena;
-            Writer output;
-            output = new BufferedWriter(new FileWriter(System.getProperty("user.dir") + "\\Archivo.txt",true));  //clears file every time
-            output.append(texto);
-            output.close();
-        }catch (IOException e) {
-            //exception handling left as an exercise for the reader
+
+    /* *************************************OPERACIONES PARA AFD******************************************/
+
+    public Set<Nodo> eClosure(Set<Nodo> T){
+        eClosureStack.addAll(T);
+        eclosureT.addAll(T);
+        while(!eClosureStack.isEmpty()){
+            Nodo t;
+            t = eClosureStack.pop();
+            ArrayList<String> transicionesDet = t.getTransiciones();
+            ArrayList<Nodo> nodosDet = t.getElNodo();
+            for (int i=0;i<transicionesDet.size();i++) {
+                String a = transicionesDet.get(i);
+                if(a.equals("$")){
+                    Nodo u = nodosDet.get(i);
+                    if(!eclosureT.contains(u)){
+                        eclosureT.add(u);
+                        eClosureStack.add(u);
+                    }
+                }
+            }
+        }
+        return eclosureT;
+    }
+
+    public Set<Nodo> move(Set<Nodo> T, String a){
+        Set<Nodo> moveTA = new HashSet<>();
+        for (Nodo n: T) {
+            ArrayList<Nodo> nodosDeN = n.getElNodo();
+            ArrayList<String> transicionesDeN = n.getTransiciones();
+            for(int i=0; i<transicionesDeN.size();i++){
+                if(transicionesDeN.get(i).equals(a)){
+                    moveTA.add(nodosDeN.get(i));
+                }
+            }
+        }
+        return moveTA;
+    }
+
+    public void subsetConstruction(Nodo nodoInicial, ArrayList<String> alfabeto, AutomataDFA dfa){
+        //Creando el conjunto inicial de Dstates
+        Set<Nodo>  conjuntoS0 = new HashSet<>();
+        conjuntoS0.add(nodoInicial);
+
+        EstadoAFD miEstadoAFD = new EstadoAFD(eClosure(conjuntoS0));
+        miEstadoAFD.setInicial(true);
+
+        //añadiendo el conjunto inicial con el que empezará el conjunto de conjuntos Dstates
+        Dstates.add(miEstadoAFD); //CAMBIE AQUI
+
+
+        //empezando el ciclo que verifica los conjuntos marcados en Dstates;
+        while(isUnmarkedState()){
+            conjuntoSinMarcar.setMarcado(true);
+            for (String a: alfabeto) {
+                Set<Nodo> conjuntoMove = conjuntoSinMarcar.getConjuntoEstados();
+                Set<Nodo> move = move(conjuntoMove,a);
+                Set<Nodo> eclosure = eClosure(move);
+                U = new EstadoAFD(eclosure);
+                if(Dstates.contains(U)){
+                    U.setMarcado(false);
+                    Dstates.add(U);
+                }
+                //Creando la nueva transicion Dtran que contiene los datos de la transicion en el DFA
+                Dtran nuevaTransicion = new Dtran(conjuntoSinMarcar, a, U);
+                dfa.getTransicionesAFD().add(nuevaTransicion);
+            }
         }
     }
+
+    public boolean isUnmarkedState(){
+        boolean hayDesmarcadoAun=false;
+        for (EstadoAFD conjunto: Dstates){
+            if (!conjunto.isMarcado()) {
+                hayDesmarcadoAun = true;
+                conjuntoSinMarcar = conjunto;
+                break;
+            }
+        }
+        return hayDesmarcadoAun;
+    }
+    /*
+    Método para obtene
+     */
+    public void getArrayNodosAFD(ArrayList<Dtran> dtran){
+        for (Dtran d:dtran) {
+            //Verificando que el conjunto de estados Origen no exista en el arrayList antes de agregarlo
+            if(!arrayTodosEstadosDFA.contains(d.getOrigen())){
+                arrayTodosEstadosDFA.add(d.getOrigen());
+            }
+
+            //Verificando que el conjunto de estados Destino no exista en el arrayList antes de agregarlo
+            if(!arrayTodosEstadosDFA.contains(d.getDestino())){
+                arrayTodosEstadosDFA.add(d.getDestino());
+            }
+        }
+    }
+    /*
+    * Método para nombrar todos los estados del arrayList de estados del AFD
+     */
+    public void nombrarNodosDFA(){
+        for(int i=0; i<arrayTodosEstadosDFA.size();i++){
+            arrayTodosEstadosDFA.get(i).setNumeroEstadoDFA(i);
+        }
+    }
+
+    /*
+     * Metodo para obtener la descripcion del AFD
+     */
+    public String descripcionAFD(AutomataDFA afd){
+        String descripcion="";
+        ArrayList<Dtran> elArray = afd.getTransicionesAFD();
+        descripcion+="Lista de nodos: {";
+        for(EstadoAFD c: arrayTodosEstadosDFA){
+            descripcion+=c.getNumeroEstadoDFA()+", ";
+        }
+        descripcion+="}\nTransiciones: ";
+        for (Dtran d: afd.getTransicionesAFD()) {
+            descripcion+="("+ d.getOrigen().getNumeroEstadoDFA() + ", " + d.getTransicion() + ", " + d.getDestino().getNumeroEstadoDFA() + "),  ";
+        }
+        return descripcion;
+    }
+
+
+    public boolean noExiste(Set<EstadoAFD> Dstates, EstadoAFD U){
+        int contador=0;
+        boolean respuesta = false;
+        for (EstadoAFD c: Dstates) {
+            if(c.getConjuntoEstados().equals(U.getConjuntoEstados())){
+                contador=1;
+            }
+        }
+        if(contador==1){
+            respuesta = false;
+        }else{
+            respuesta = true;
+        }
+        return respuesta;
+    }
+
 }
