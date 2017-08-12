@@ -17,9 +17,7 @@ public class Operaciones {
     
     public static ArrayList<Nodo> miArrayNodos = new ArrayList<>();
     ArrayList<EstadoAFD> arrayTodosEstadosDFA = new ArrayList<>();
-    Set<EstadoAFD> Dstates = new HashSet<>();
     Set<Nodo> eclosureT = new HashSet<>();
-    EstadoAFD U;
     EstadoAFD conjuntoSinMarcar;
     Stack<Nodo> eClosureStack = new Stack<>();
 
@@ -205,7 +203,7 @@ public class Operaciones {
         return moveTA;
     }
 
-    public void subsetConstruction(Nodo nodoInicial, ArrayList<String> alfabeto, AutomataDFA dfa){
+    public void subsetConstruction(Nodo nodoInicial, ArrayList<String> alfabeto, AutomataDFA afd){
         //Creando el conjunto inicial de Dstates
         Set<Nodo>  conjuntoS0 = new HashSet<>();
         conjuntoS0.add(nodoInicial);
@@ -214,35 +212,33 @@ public class Operaciones {
         miEstadoAFD.setInicial(true);
 
         //añadiendo el conjunto inicial con el que empezará el conjunto de conjuntos Dstates
-        Dstates.add(miEstadoAFD); //CAMBIE AQUI
-
+        afd.getDstates().add(miEstadoAFD); //CAMBIE AQUI
 
         //empezando el ciclo que verifica los conjuntos marcados en Dstates;
-        while(isUnmarkedState()){
-            conjuntoSinMarcar.setMarcado(true);
+        while(hasUnmarkedState(afd.getDstates())){
+            //conjuntoSinMarcar.setMarcado(true);
             for (String a: alfabeto) {
                 Set<Nodo> conjuntoMove = conjuntoSinMarcar.getConjuntoEstados();
-                Set<Nodo> move = move(conjuntoMove,a);
-                Set<Nodo> eclosure = eClosure(move);
-                U = new EstadoAFD(eclosure);
-                if(Dstates.contains(U)){
+                Set<Nodo> eclosure = eClosure(move(conjuntoMove, a));
+                EstadoAFD U = new EstadoAFD(eclosure);
+                if(!existe(afd.getDstates(), U)){
                     U.setMarcado(false);
-                    Dstates.add(U);
+                    afd.getDstates().add(U);
                 }
                 //Creando la nueva transicion Dtran que contiene los datos de la transicion en el DFA
                 Dtran nuevaTransicion = new Dtran(conjuntoSinMarcar, a, U);
-                dfa.getTransicionesAFD().add(nuevaTransicion);
+                afd.getTransicionesAFD().add(nuevaTransicion);
             }
         }
     }
 
-    public boolean isUnmarkedState(){
+    public boolean hasUnmarkedState(Set<EstadoAFD> Dstates){
         boolean hayDesmarcadoAun=false;
         for (EstadoAFD conjunto: Dstates){
             if (!conjunto.isMarcado()) {
                 hayDesmarcadoAun = true;
+                conjunto.setMarcado(true);
                 conjuntoSinMarcar = conjunto;
-                break;
             }
         }
         return hayDesmarcadoAun;
@@ -277,7 +273,8 @@ public class Operaciones {
      */
     public String descripcionAFD(AutomataDFA afd){
         String descripcion="";
-        ArrayList<Dtran> elArray = afd.getTransicionesAFD();
+        //System.out.println(arrayTodosEstadosDFA);
+        //ArrayList<Dtran> elArray = afd.getTransicionesAFD();
         descripcion+="Lista de nodos: {";
         for(EstadoAFD c: arrayTodosEstadosDFA){
             descripcion+=c.getNumeroEstadoDFA()+", ";
@@ -290,18 +287,14 @@ public class Operaciones {
     }
 
 
-    public boolean noExiste(Set<EstadoAFD> Dstates, EstadoAFD U){
-        int contador=0;
+    public boolean existe(Set<EstadoAFD> Dstates, EstadoAFD U){
+        System.out.println("Nueva iteracion ");
         boolean respuesta = false;
         for (EstadoAFD c: Dstates) {
+            System.out.println(c.getConjuntoEstados() + "-- comparado con --"+ U.getConjuntoEstados());
             if(c.getConjuntoEstados().equals(U.getConjuntoEstados())){
-                contador=1;
+                respuesta = true;
             }
-        }
-        if(contador==1){
-            respuesta = false;
-        }else{
-            respuesta = true;
         }
         return respuesta;
     }

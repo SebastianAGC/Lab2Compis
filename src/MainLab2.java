@@ -17,7 +17,9 @@ public class MainLab2{
         Operaciones operacion = new Operaciones();
         RegExConverter sC = new RegExConverter();
         String regexp;
+        String cadenaEx;
         String regexpPF;
+        String regexpPFdirecta;
         Stack<Automata> miStack = new Stack<>();
         ArrayList<String> alfabeto = new ArrayList<>();
 
@@ -25,8 +27,18 @@ public class MainLab2{
         //Solicitando al usuario que ingrese la expresion regular
         System.out.println("Ingrese la expresion regular que desee: ");
         regexp=scanner.nextLine();
-        //Conversion de la cadena a notacion Postfix 
+
+
+        //Creando la expresion regular extendida
+        cadenaEx="("+ regexp + ")#";
+
+        //Conversion de la cadena a notacion Postfix
         regexpPF = sC.infixToPostfix(regexp);
+
+
+        regexpPFdirecta= sC.infixToPostfix(cadenaEx);
+        System.out.println(cadenaEx);
+        System.out.println(regexpPFdirecta);
 
         long time_start, time_end;
         time_start = System.currentTimeMillis();
