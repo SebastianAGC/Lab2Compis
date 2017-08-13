@@ -7,14 +7,16 @@
  */
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class AutomataDFA {
     private ArrayList<Dtran> transicionesAFD = new ArrayList<>();
+    private ArrayList<DtranHoja> transicionesAFDHoja = new ArrayList<>();
+    private ArrayList<EstadoAFDHoja> Dstates = new ArrayList<>();
+    private EstadoAFDHoja S;
     private EstadoAFD estadoInicial;
     private EstadoAFD estadoFinal;
-    private Set<EstadoAFD> Dstates = new HashSet<>();
+    private EstadoAFDHoja estadoInicialHoja;
+    private EstadoAFDHoja estadoFinalHoja;
 
     public AutomataDFA() {
 
@@ -44,12 +46,43 @@ public class AutomataDFA {
         this.estadoFinal = estadoFinal;
     }
 
-
-    public Set<EstadoAFD> getDstates() {
+    public ArrayList<EstadoAFDHoja> getDstates() {
         return Dstates;
     }
 
-    public void setDstates(Set<EstadoAFD> dstates) {
+    public void setDstates(ArrayList<EstadoAFDHoja> dstates) {
         Dstates = dstates;
+    }
+
+    public EstadoAFDHoja getS() {
+        return S;
+    }
+
+    public void setS(EstadoAFDHoja s) {
+        S = s;
+    }
+
+    public ArrayList<DtranHoja> getTransicionesAFDHoja() {
+        return transicionesAFDHoja;
+    }
+
+    public void setTransicionesAFDHoja(ArrayList<DtranHoja> transicionesAFDHoja) {
+        this.transicionesAFDHoja = transicionesAFDHoja;
+    }
+
+    public EstadoAFDHoja getEstadoInicialHoja() {
+        return estadoInicialHoja;
+    }
+
+    public void setEstadoInicialHoja(EstadoAFDHoja estadoInicialHoja) {
+        this.estadoInicialHoja = estadoInicialHoja;
+    }
+
+    public EstadoAFDHoja getEstadoFinalHoja() {
+        return estadoFinalHoja;
+    }
+
+    public void setEstadoFinalHoja(EstadoAFDHoja estadoFinalHoja) {
+        this.estadoFinalHoja = estadoFinalHoja;
     }
 }
