@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /*
  * Universdidad del Valle de Guatemala
  * Diseño de lenguajes de programacion
@@ -6,17 +8,23 @@
  * @author Sebastian Galindo, Carnet: 15452
  */
 
-import java.util.ArrayList;
-
 public class AutomataDFA {
+    //Variables para automata convertido
     private ArrayList<Dtran> transicionesAFD = new ArrayList<>();
+    private ArrayList<EstadoAFD> DstatesAFD = new ArrayList<>();
+    private EstadoAFD T;
+    private EstadoAFD estadoInicial;
+    private EstadoAFD estadoFinal;
+    private EstadoAFD U;
+
+
+    //Variables para automata directo
     private ArrayList<DtranHoja> transicionesAFDHoja = new ArrayList<>();
     private ArrayList<EstadoAFDHoja> Dstates = new ArrayList<>();
     private EstadoAFDHoja S;
-    private EstadoAFD estadoInicial;
-    private EstadoAFD estadoFinal;
     private EstadoAFDHoja estadoInicialHoja;
     private EstadoAFDHoja estadoFinalHoja;
+    private EstadoAFDHoja U2;
 
     public AutomataDFA() {
 
@@ -84,5 +92,37 @@ public class AutomataDFA {
 
     public void setEstadoFinalHoja(EstadoAFDHoja estadoFinalHoja) {
         this.estadoFinalHoja = estadoFinalHoja;
+    }
+
+    public ArrayList<EstadoAFD> getDstatesAFD() {
+        return DstatesAFD;
+    }
+
+    public void setDstatesAFD(ArrayList<EstadoAFD> dstatesAFD) {
+        DstatesAFD = dstatesAFD;
+    }
+
+    public EstadoAFD getT() {
+        return T;
+    }
+
+    public void setT(EstadoAFD t) {
+        T = t;
+    }
+
+    public EstadoAFD getU() {
+        return U;
+    }
+
+    public void setU(EstadoAFD u) {
+        U = u;
+    }
+
+    public EstadoAFDHoja getU2() {
+        return U2;
+    }
+
+    public void setU2(EstadoAFDHoja u2) {
+        U2 = u2;
     }
 }

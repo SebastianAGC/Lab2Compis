@@ -9,9 +9,8 @@ public class EstadoAFDHoja {
     private boolean isInicial;
     private boolean isFinal;
 
-    public EstadoAFDHoja(Set<Hoja> elSet, boolean marcado) {
+    public EstadoAFDHoja(Set<Hoja> elSet) {
         this.elSet = elSet;
-        this.marcado = marcado;
     }
 
     public Set<Hoja> getElSet() {

@@ -23,11 +23,9 @@ public class MainLab2{
         Stack<Automata> miStack = new Stack<>();
         ArrayList<String> alfabeto = new ArrayList<>();
 
-
         //Solicitando al usuario que ingrese la expresion regular
         System.out.println("Ingrese la expresion regular que desee: ");
         regexp=scanner.nextLine();
-
 
         //Conversion de la cadena a notacion Postfix 
         regexpPF = sC.infixToPostfix(regexp);
@@ -36,7 +34,6 @@ public class MainLab2{
         cadenaExtendida="("+regexp+")#";
         regexPFestendida=sC.infixToPostfix(cadenaExtendida);
         System.out.println("Cadena extendida postfix:  " + regexPFestendida);
-
 
         long time_start, time_end;
         time_start = System.currentTimeMillis();
@@ -124,23 +121,22 @@ public class MainLab2{
 
         //Nombrando a los nodos
         operacion.nombrarNodos();
+        elAutomatota.getNodoFinal().setEsFinal(true);
+
+
+/* *************************************** Conversion de AFN a AFD ****************************************************/
 
         long time_star, time_en;
         time_star = System.currentTimeMillis();
 
-
-        /* *******************************Conversion de AFN a AFD****************************************************/
         AutomataDFA DFA  = new AutomataDFA();
         operacion.subsetConstruction(elAutomatota.getNodoInicial(), alfabeto, DFA);
 
         time_en = System.currentTimeMillis();
         System.out.println("El AFD fue creado en: "+ ( time_en - time_star ) +" millisegundos'");
 
-        //Obteniendo un arrayList que contenga todos los nodos del AFD
-        operacion.getArrayNodosAFD(DFA.getTransicionesAFD());
-
         //Nombrando los nodos del AFD
-        operacion.nombrarNodosDFA();
+        operacion.nombrarNodosDFA(DFA);
 
 
 /* ****************************************Construccion directa del AFD**************************************/
@@ -148,17 +144,13 @@ public class MainLab2{
         //Obteniendo la hoja final del arbol sintactico
         Hoja n = operacion.generarArbolSintactico(regexPFestendida);
 
-
         AutomataDFA cd = new AutomataDFA();
         operacion.construccionDirecta(cd, n, alfabeto);
         operacion.nombrarNodos(cd);
         String c = operacion.descripcionAFDdirecto(cd, alfabeto);
 
 
-
-
-
-
+/* ******************************************GENERACION DE ARCHIVOS***************************************************************/
         BufferedWriter bw = null;
         FileWriter fw = null;
 
@@ -170,7 +162,23 @@ public class MainLab2{
                     + "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
                     + elAutomatota.getNodoInicial().getNumeroEstado() + "\nAceptacion = " + elAutomatota.getNodoFinal().getNumeroEstado()
                     + "\nTransiciones: " + operacion.transiciones() + c
-                    + "\n\n\nAFD:\n"+operacion.descripcionAFD(DFA));
+                    + "\n\n\nAFD:\n"+operacion.descripcionAFD(DFA, alfabeto));
+            writer.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+        BufferedWriter bw1 = null;
+        FileWriter fw1 = null;
+
+
+        try {
+
+            PrintWriter writer = new PrintWriter("Conversion AFN-AFD.txt");
+            writer.println("AFD:\n"+operacion.descripcionAFD(DFA, alfabeto));
             writer.close();
 
         } catch (Exception e) {
