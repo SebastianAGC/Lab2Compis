@@ -809,7 +809,6 @@ public class Operaciones {
         //Nombrando cada uno de los estados
         for(int i=0;i<setFinal.size();i++){
             setFinal.get(i).setNumeroEstadoMin(i);
-            System.out.println(setFinal.get(i).getNumeroEstadoMin());
         }
 
         for (AFDminimizado afd: setFinal) {
@@ -845,7 +844,7 @@ public class Operaciones {
         try {
 
             PrintWriter writer = new PrintWriter("Descripcion AFD Minimizado.txt");
-            writer.println(descripcionMinimizada);
+            writer.println("\nAFN Minimizado: \n"+descripcionMinimizada);
             writer.close();
 
         } catch (Exception e) {

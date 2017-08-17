@@ -1,6 +1,6 @@
 AFD:
 Lista de nodos: {0, 1, 2, 3, 4, }
-Alfabeto: {a, b, }
+Alfabeto: {1, 0, }
 Estado incial: 0
-Estado final: 4, 
-Transiciones: (0-a-1), (0-b-2), (2-a-1), (2-b-2), (1-a-1), (1-b-3), (3-a-1), (3-b-4), (4-a-1), (4-b-2), 
+Estado final: 2, 3, 
+Transiciones: (0-1-1), (0-0-2), (2-1-1), (2-0-3), (3-1-1), (3-0-3), (1-1-1), (1-0-4), (4-1-1), (4-0-3), 
