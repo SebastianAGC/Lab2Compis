@@ -1,4 +1,5 @@
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -20,6 +21,7 @@ public class MainLab2{
         String regexpPF;
         String cadenaExtendida;
         String regexPFestendida;
+        String cadenaSimulacion;
         Stack<Automata> miStack = new Stack<>();
         ArrayList<String> alfabeto = new ArrayList<>();
 
@@ -33,10 +35,10 @@ public class MainLab2{
         //Creando cadena Extendida para la generación directa de AFD's
         cadenaExtendida="("+regexp+")#";
         regexPFestendida=sC.infixToPostfix(cadenaExtendida);
-        System.out.println("Cadena extendida postfix:  " + regexPFestendida);
+        //System.out.println("Cadena extendida postfix:  " + regexPFestendida);
 
         long time_start, time_end;
-        time_start = System.currentTimeMillis();
+        time_start = System.nanoTime();
 
         for (int x=0;x<regexpPF.length();x++){
             String caracter = String.valueOf(regexpPF.charAt(x));
@@ -111,8 +113,10 @@ public class MainLab2{
             }
         }
 
-        time_end = System.currentTimeMillis();
-        System.out.println("El AFN fue creado en: "+ ( time_end - time_start ) +" millisegundos'");
+        time_end = System.nanoTime();
+        double delta1 = time_end - time_start;
+        delta1 = delta1 / 1000000;
+        System.out.println("\nEl AFN fue creado en: "+ delta1 +" milisegundos'");
 
         Automata elAutomatota = miStack.pop();
 
@@ -127,13 +131,15 @@ public class MainLab2{
 /* *************************************** Conversion de AFN a AFD ****************************************************/
 
         long time_star, time_en;
-        time_star = System.currentTimeMillis();
+        time_star = System.nanoTime();
 
         AutomataDFA DFA  = new AutomataDFA();
         operacion.subsetConstruction(elAutomatota.getNodoInicial(), alfabeto, DFA);
 
-        time_en = System.currentTimeMillis();
-        System.out.println("El AFD fue creado en: "+ ( time_en - time_star ) +" millisegundos'");
+        time_en = System.nanoTime();
+        delta1 = time_en - time_star;
+        delta1 = delta1 / 1000000;
+        System.out.println("El AFD fue creado en: "+ delta1 +" milisegundos'");
 
         //Nombrando los nodos del AFD
         operacion.nombrarNodosDFA(DFA);
@@ -141,11 +147,18 @@ public class MainLab2{
 
 /* ****************************************Construccion directa del AFD**************************************/
 
+        long time_sta, time_e;
+        time_sta = System.nanoTime();
         //Obteniendo la hoja final del arbol sintactico
         Hoja n = operacion.generarArbolSintactico(regexPFestendida);
 
         AutomataDFA cd = new AutomataDFA();
         operacion.construccionDirecta(cd, n, alfabeto);
+
+        time_e = System.nanoTime();
+        delta1 = time_e - time_sta;
+        delta1 = delta1 / 1000000;
+        System.out.println("El AFD directo fue creado en: " + delta1 + " milisegundos.");
         operacion.nombrarNodos(cd);
         String c = operacion.descripcionAFDdirecto(cd, alfabeto);
 
@@ -157,12 +170,11 @@ public class MainLab2{
 
         try {
 
-            PrintWriter writer = new PrintWriter("archivo.txt");
+            PrintWriter writer = new PrintWriter("Descripcion AFN.txt");
             writer.println("AFN:\nLista de nodos = "+operacion.listadoDeNodos()
                     + "\nAlfabeto = "+ operacion.alfabeto(alfabeto)+"\nInicio = "
                     + elAutomatota.getNodoInicial().getNumeroEstado() + "\nAceptacion = " + elAutomatota.getNodoFinal().getNumeroEstado()
-                    + "\nTransiciones: " + operacion.transiciones() + c
-                    + "\n\n\nAFD:\n"+operacion.descripcionAFD(DFA, alfabeto));
+                    + "\nTransiciones: " + operacion.transiciones());
             writer.close();
 
         } catch (Exception e) {
@@ -177,7 +189,24 @@ public class MainLab2{
 
         try {
 
-            PrintWriter writer = new PrintWriter("Conversion AFN-AFD.txt");
+            PrintWriter writer = new PrintWriter("Descripcion AFD directo.txt");
+            writer.println(c);
+            writer.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+
+        BufferedWriter bw2 = null;
+        FileWriter fw2 = null;
+
+
+        try {
+
+            PrintWriter writer = new PrintWriter("Descripcion AFN-AFD.txt");
             writer.println("AFD:\n"+operacion.descripcionAFD(DFA, alfabeto));
             writer.close();
 
@@ -186,5 +215,38 @@ public class MainLab2{
             e.printStackTrace();
 
         }
+
+        System.out.println("\nIngrese la cadena que desea simular en el AFN: ");
+        cadenaSimulacion=scanner.nextLine();
+        long time_i, time_f;
+        time_i=System.nanoTime();
+        operacion.simulacionAFN(elAutomatota, cadenaSimulacion);
+        time_f=System.nanoTime();
+        delta1 = time_f - time_i;
+        delta1 = delta1 / 1000000;
+        System.out.println("La simulación duró: " + delta1 + " milisegundos.");
+
+        System.out.println("\nIngrese la cadena que desea simular en el AFD: ");
+        cadenaSimulacion=scanner.nextLine();
+        long time_in, time_fi;
+        time_in=System.nanoTime();
+        operacion.simulacionAFD(DFA, cadenaSimulacion);
+        time_fi=System.nanoTime();
+        delta1 = time_fi - time_in;
+        delta1 = delta1 / 1000000;
+        System.out.println("La simulación duró: " + delta1 + " milisegundos.");
+
+        System.out.println("\nIngrese la cadena que desea simular en el AFD directo: ");
+        cadenaSimulacion=scanner.nextLine();
+        long time_ini, time_fin;
+        time_ini=System.nanoTime();
+        operacion.simulacionAFDdirecto(cd, cadenaSimulacion);
+        time_fin=System.nanoTime();
+        delta1 = time_fin - time_ini;
+        delta1 = delta1 / 1000000;
+        System.out.println("La simulación duró: " + delta1 + " milisegundos.");
+
+        operacion.minimizar(DFA, alfabeto);
+
     }
 }

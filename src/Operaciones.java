@@ -1,4 +1,8 @@
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -153,6 +157,31 @@ public class Operaciones {
         return cadena;
     }
 
+    public void simulacionAFN(Automata automata, String cadena){
+        Set<Nodo> setInicial = new HashSet<>();
+        setInicial.add(automata.getNodoInicial());
+        Set<Nodo> S = eClosure(setInicial);
+        String c;
+        int x = 0, y = 0;
+
+        while(x < cadena.length()){
+            c=String.valueOf(cadena.charAt(x));
+            S=eClosure(move(S, c));
+            x++;
+        }
+        for (Nodo n: S) {
+            if(n.isEsFinal()){
+                y=1;
+            }
+        }
+        if(y==1){
+            System.out.println("La cadena SI es aceptada.");
+        }else{
+            System.out.println("La cadena NO es aceptada.");
+        }
+
+    }
+
 
     /* *************************************OPERACIONES PARA AFD******************************************/
 
@@ -290,6 +319,49 @@ public class Operaciones {
         }
 
         return yaesta;
+    }
+
+    public EstadoAFD moveSimulacion(EstadoAFD estado, String a, AutomataDFA automata){
+        EstadoAFD moveTA = null;
+        ArrayList<Dtran> transiciones = automata.getTransicionesAFD();
+        for (Dtran d: transiciones) {
+            if(d.getOrigen().equals(estado)){
+                if(d.getTransicion().equals(a)){
+                    moveTA=d.getDestino();
+                }
+            }
+        }
+        return moveTA;
+    }
+
+    public void simulacionAFD(AutomataDFA automata, String cadena){
+        EstadoAFD e = automata.getEstadoInicial();
+        String c;
+        int x = 0, y=0;
+
+        while(x<cadena.length()){
+            c=String.valueOf(cadena.charAt(x));
+            e = moveSimulacion(e, c, automata);
+            x++;
+            if(e==null){
+                y=0;
+                break;
+            }else{
+                if(e.isFinal()){
+                    y=1;
+                }else{
+                    y=0;
+                }
+            }
+
+        }
+
+        if(y==1){
+            System.out.println("La cadena SI es aceptada.");
+        }else{
+            System.out.println("La cadena NO es aceptada.");
+        }
+
     }
 
     /* *********************************GENERACION DE AFD DIRECTA********************************************************/
@@ -560,6 +632,11 @@ public class Operaciones {
         for(int x=0; x<automata.getDstates().size(); x++){
             automata.getDstates().get(x).setNumeroEstadoDFA(x);
         }
+        for (EstadoAFDHoja e: automata.getDstates()) {
+            if(e.equals(automata.getEstadoFinalHoja())){
+                e.setFinal(true);
+            }
+        }
     }
 
 
@@ -577,7 +654,8 @@ public class Operaciones {
 
     //Metodo que genera la descripcion del automata AFD generado directamente
     public String descripcionAFDdirecto(AutomataDFA automata, ArrayList<String> alfabeto){
-        String descripcion="\n\nAFD Construccion Directa: \n\nEstados: {";
+
+        String descripcion="AFD Construccion Directa: \n\nEstados: {";
         for (EstadoAFDHoja e:automata.getDstates()) {
             descripcion += e.getNumeroEstadoDFA() +", ";
         }
@@ -590,7 +668,224 @@ public class Operaciones {
         for (DtranHoja d:automata.getTransicionesAFDHoja()) {
             descripcion+="("+d.getOrigen().getNumeroEstadoDFA()+"-"+d.getTransicion()+"-"+d.getDestino().getNumeroEstadoDFA() +"), ";
         }
+
         descripcion+="}";
+        for (EstadoAFDHoja e: automata.getDstates()) {
+            if(e.equals(automata.getEstadoFinalHoja())){
+                e.setFinal(true);
+            }
+        }
         return descripcion;
     }
+
+    public EstadoAFDHoja moveSimulacionDirecto(EstadoAFDHoja estado, String a, AutomataDFA automata){
+        EstadoAFDHoja moveTA = null;
+        ArrayList<DtranHoja> transiciones = automata.getTransicionesAFDHoja();
+        for (DtranHoja d: transiciones) {
+            if(d.getOrigen().equals(estado)){
+                if(d.getTransicion().equals(a)){
+                    moveTA=d.getDestino();
+                }
+            }
+        }
+        return moveTA;
+    }
+
+    public void simulacionAFDdirecto(AutomataDFA automata, String cadena){
+        EstadoAFDHoja e = automata.getEstadoInicialHoja();
+        String c;
+        int x = 0, y=0;
+
+        while(x<cadena.length()){
+            c=String.valueOf(cadena.charAt(x));
+            e = moveSimulacionDirecto(e, c, automata);
+            x++;
+            if(e==null){
+                y=0;
+                break;
+            }else{
+                if(e.isFinal()){
+                    y=1;
+                }else{
+                    y=0;
+                }
+            }
+
+        }
+        if(y==1){
+            System.out.println("La cadena SI es aceptada.");
+        }else{
+            System.out.println("La cadena NO es aceptada.");
+        }
+
+    }
+
+/* ***************************************MINIMIZACION DE AFD*************************************************************/
+
+    public void minimizar(AutomataDFA automata, ArrayList<String> alfabeto) {
+        ArrayList<EstadoAFD> estados = automata.getDstatesAFD();
+        ArrayList<AFDminimizado> R = new ArrayList<>();
+
+        //Generando la tabla de parejas de estados
+        for (int i = 0; i < estados.size(); i++) {
+            for (int j = 0; j < estados.size(); j++) {
+                AFDminimizado am = new AFDminimizado(estados.get(i), estados.get(j), false);
+                R.add(am);
+
+            }
+        }
+
+        //Marcando las parejas de estados si alguno de los dos es estado final
+        for (AFDminimizado a : R) {
+            if (a.getP().isFinal() && a.getQ().isFinal()) {
+
+            } else if (a.getP().isFinal() || a.getQ().isFinal()) {
+                a.setMarcado(true);
+            }
+
+        }
+
+        //loop(R, alfabeto, automata);
+        int cont = 0;
+        while (cont < 100000) {
+            for (AFDminimizado a : R) {
+                if (!a.isMarcado()) {
+                    for (String c : alfabeto) {
+                        EstadoAFD moveP = moveSimulacion(a.getP(), c, automata);
+                        EstadoAFD moveQ = moveSimulacion(a.getQ(), c, automata);
+                        for (AFDminimizado afdm : R) {
+                            if (afdm.getP().equals(moveP) && afdm.getQ().equals(moveQ)) {
+                                if (afdm.isMarcado()) {
+                                    a.setMarcado(true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            cont++;
+        }
+
+        Set<AFDminimizado> F = new HashSet<>();
+        for (AFDminimizado a : R) {
+            if (!a.isMarcado()) {
+                F.add(a);
+            }
+        }
+
+        for (AFDminimizado a: F) {
+            a.getSet().add(a.getP());
+            a.getSet().add(a.getQ());
+
+        }
+
+        Set<AFDminimizado> estadosRepetidos = new HashSet<>();
+        Set<AFDminimizado> repetido =  new HashSet<>();
+        repetido.addAll(F);
+
+
+        for (AFDminimizado a: F) {
+            repetido.removeAll(estadosRepetidos);
+            for (AFDminimizado b: repetido) {
+                if(b.equals(a)){
+                    //hacernada
+                }else{
+                    for (EstadoAFD s: b.getSet()) {
+                        if(a.getSet().contains(s)){
+                            a.getSet().addAll(b.getSet());
+                            estadosRepetidos.add(b);
+                        }
+                    }
+                }
+            }
+            repetido.remove(a);
+        }
+
+        F.removeAll(estadosRepetidos);
+        ArrayList<AFDminimizado> setFinal = new ArrayList<>();
+        setFinal.addAll(F);
+
+
+        //Nombrando cada uno de los estados
+        for(int i=0;i<setFinal.size();i++){
+            setFinal.get(i).setNumeroEstadoMin(i);
+            System.out.println(setFinal.get(i).getNumeroEstadoMin());
+        }
+
+        for (AFDminimizado afd: setFinal) {
+            for (String a:alfabeto) {
+                moveMin(afd,a,automata);
+                for (AFDminimizado destino:setFinal) {
+                    if(destino.getSet().equals(moveMin(afd,a,automata))){
+                        DtranAFDMin d = new DtranAFDMin(afd,a, destino);
+                        afd.getTransiciones().add(d);
+                    }
+                }
+            }
+        }
+
+
+        String descripcionMinimizada = "Estados: ";
+        for (AFDminimizado a: setFinal) {
+            descripcionMinimizada+=a.getNumeroEstadoMin()+", ";
+        }
+        descripcionMinimizada+="\nTransiciones: ";
+        for (AFDminimizado a: setFinal) {
+            ArrayList<DtranAFDMin> transicionesDelEstadoMin = a.getTransiciones();
+            for (DtranAFDMin d: transicionesDelEstadoMin) {
+                descripcionMinimizada+="("+d.getOrigen().getNumeroEstadoMin()+"-"+d.getTransicion()+"-"+d.getDestino().getNumeroEstadoMin()+"), ";
+            }
+
+        }
+
+        BufferedWriter bw2 = null;
+        FileWriter fw2 = null;
+
+
+        try {
+
+            PrintWriter writer = new PrintWriter("Descripcion AFD Minimizado.txt");
+            writer.println(descripcionMinimizada);
+            writer.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+
+
+
+    }
+
+    public void loop(ArrayList<AFDminimizado> R, ArrayList<String> alfabeto, AutomataDFA automata){
+        for (AFDminimizado a: R) {
+            if(!a.isMarcado()){
+                for (String c: alfabeto) {
+                    EstadoAFD moveP = moveSimulacion(a.getP(), c, automata);
+                    EstadoAFD moveQ = moveSimulacion(a.getQ(), c, automata);
+                    for (AFDminimizado afdm:R) {
+                        if(afdm.getP().equals(moveP) && afdm.getQ().equals(moveQ)){
+                            if(afdm.isMarcado()){
+                                a.setMarcado(true);
+                                loop(R,alfabeto,automata);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public Set<EstadoAFD> moveMin(AFDminimizado estado, String a, AutomataDFA automata){
+        Set<EstadoAFD> nodosDestino = new HashSet<>();
+        for (EstadoAFD e: estado.getSet()) {
+            EstadoAFD destino = moveSimulacion(e, a, automata);
+            nodosDestino.add(destino);
+        }
+        return nodosDestino;
+    }
+
+
 }
